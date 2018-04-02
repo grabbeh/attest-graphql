@@ -27,8 +27,7 @@ const resolvers = {
   Query: {
     contracts: async (root, args, { user }) => {
       return Contract.find({
-        masterEntityID: user.masterEntityID,
-        active: true
+        masterEntityID: user.masterEntityID
       })
     },
     contract: (root, { id }) => {
