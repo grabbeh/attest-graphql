@@ -27,7 +27,8 @@ const resolvers = {
   Query: {
     contracts: async (root, args, { user }) => {
       return Contract.find({
-        masterEntityID: user.masterEntityID
+        masterEntityID: user.masterEntityID,
+        active: true
       })
     },
     contract: (root, { id }) => {
@@ -136,10 +137,20 @@ const resolvers = {
       let notifications = await Notification.find()
         .populate('relatedContract')
         .populate('relatedUser')
-      return notifications
+      let unread = _.filter(notifications, n => {
+        return !_.includes(n.readBy, user._id)
+      })
+      return unread
     }
   },
   Mutation: {
+    updateNotification: async (root, { id }, { user }) => {
+      let notification = await Notification.findById(id)
+      notification.readBy.push(user._id)
+      return Notification.findByIdAndUpdate(id, notification, {
+        new: true
+      })
+    },
     updateMasterEntity: (root, { masterEntity }, { user }) => {
       return MasterEntity.findByIdAndUpdate(user.masterEntityID, masterEntity, {
         new: true
@@ -160,9 +171,11 @@ const resolvers = {
       addNotification(newContract.id, user, 'ADD_CONTRACT')
       return newContract
     },
-    deleteContract: (root, { id }, { user }) => {
+    deleteContract: async (root, { id }, { user }) => {
       addNotification(id, user, 'DELETE_CONTRACT')
-      return Contract.findByIdAndRemove(id)
+      let contract = await Contract.findById(id).lean()
+      contract.active = false
+      return Contract.findByIdAndUpdate(id, contract, { new: true })
     },
     deleteUser: (root, { id }) => {
       return User.remove({ _id: id })

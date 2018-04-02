@@ -25,6 +25,7 @@ type Mutation {
   updateUser(user: PostUserWithID): User
   createInitialAccount(name: String!, email: String!, password: String!): String
   updateMasterEntity(masterEntity: PostMasterEntity): MasterEntity
+  updateNotification(id: String): Notification
   login(email: String!, password: String!): String
 }
 
@@ -34,6 +35,7 @@ type Notification {
   relatedContract: Contract
   action: String
   relatedUser: User
+  id: ID
 }
 
 type MasterEntity {

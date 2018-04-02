@@ -40,13 +40,8 @@
     ]
   },
   "scripts": {
-    "dev": "node index.js",
-    "build": "next build",
-    "start-next": "NODE_ENV=production forever start index.js",
     "start-graph": "NODE_ENV=production forever start ./graphql/compiled/server.js",
     "watch-graph": "babel ./graphql/input --watch --out-dir ./graphql/compiled",
-    "watch-data": "babel ./data/input --watch --out-dir ./data/compiled",
-    "watch-all": "npm run dev && npm run watch-graph",
     "compile-graph": "babel ./graphql/input --out-dir ./graphql/compiled"
   },
   "repository": {

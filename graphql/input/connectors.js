@@ -5,6 +5,7 @@ mongoose.Promise = require('bluebird')
 let Schema = mongoose.Schema
 
 const ContractSchema = mongoose.Schema({
+  active: { type: Boolean, default: true },
   ownerEntity: String,
   masterEntityID: String,
   internalParties: Array,
@@ -83,7 +84,7 @@ const MasterEntitySchema = mongoose.Schema({
 const MasterEntity = mongoose.model('masterEntity', MasterEntitySchema)
 
 const NotificationSchema = mongoose.Schema({
-  readBy: Array,
+  readBy: { type: Array, default: [] },
   masterEntityID: Schema.Types.ObjectId,
   relatedContract: { type: Schema.Types.ObjectId, ref: 'contract' },
   action: String,

@@ -1,5 +1,6 @@
 import { Notification, Contract } from './connectors'
 import diff from 'deep-diff'
+import _ from 'lodash'
 
 const d = diff.diff
 
