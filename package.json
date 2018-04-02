@@ -21,7 +21,7 @@
     "graphql-tools": "^2.23.1",
     "http-proxy-middleware": "^0.17.4",
     "jsonwebtoken": "^8.1.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.5",
     "moment": "^2.21.0",
     "moment-range": "^3.0.3",
     "mongoose": "^4.12.3"

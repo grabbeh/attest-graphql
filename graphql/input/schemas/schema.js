@@ -10,7 +10,7 @@ type Query {
   user: User
   currentTags: [Tag]
   currentBusinessUnits: [BusinessUnit]
-  currentLawyers: [String]
+  currentLawyers: [User]
   currentStatuses: [Status]
   allUsers: [User]
   allNotifications: [Notification]
@@ -54,13 +54,14 @@ input PostMasterEntity {
 }
 
 type User {
-  id: ID!
+  id: ID
   name: String
   email: String
   masterEntityID: String
   isLawyer: Boolean
   isAdmin: Boolean
   isActivated: Boolean
+  checked: Boolean
 }
 
 input PostUser {
@@ -71,6 +72,7 @@ input PostUser {
   isLawyer: Boolean
   isAdmin: Boolean
   isActivated: Boolean
+  checked: Boolean
 }
 
 input PostUserWithID {

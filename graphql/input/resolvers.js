@@ -33,6 +33,20 @@ const resolvers = {
     contract: (root, { id }) => {
       return Contract.findOne({ id })
     },
+    currentLawyers: async (root, args, { user }) => {
+      let contracts = await Contract.find({
+        masterEntityID: user.masterEntityID
+      }).populate('assignedTo')
+      let lawyers = _.uniq(_.map(_.map(contracts, 'assignedTo'), 'name'))
+      let updatedLawyers = lawyers.map(name => {
+        let checked = false
+        return {
+          name,
+          checked
+        }
+      })
+      return updatedLawyers
+    },
     currentTags: async (root, args, { user }) => {
       let contracts = await Contract.find({
         masterEntityID: user.masterEntityID
@@ -103,15 +117,6 @@ const resolvers = {
         }
       })
       return updatedStatuses
-    },
-    currentLawyers: async (root, args, { user }) => {
-      let contracts = await Contract.find({
-        masterEntityID: user.masterEntityID
-      })
-      let lawyers = _.uniq(
-        _.pick(_.flatten(_.map(contracts, 'assignedTo'), _.identity))
-      )
-      return lawyers
     },
     masterEntity: async (root, args, { user }) => {
       let entity = await MasterEntity.findById(user.masterEntityID)
