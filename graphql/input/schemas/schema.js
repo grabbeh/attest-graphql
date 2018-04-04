@@ -36,6 +36,28 @@ type Notification {
   action: String
   relatedUser: User
   id: ID
+  changes: [Change]
+  createdAt: Date
+}
+
+type Change {
+  attr: String
+  added: String
+  addedObject: AddedObject
+  removed: String
+  removedObject: RemovedObject
+}
+
+type AddedObject {
+  name: String
+  color: String
+  date: Date
+}
+
+type RemovedObject {
+  name: String
+  color: String
+  date: Date
 }
 
 type MasterEntity {
@@ -147,6 +169,8 @@ type Contract {
   client: Boolean
   supplier: Boolean
   assignedTo: User
+  createdAt: Date
+  updatedAt: Date
 }
 
 input ContractStatusInput {

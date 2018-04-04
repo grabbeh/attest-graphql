@@ -24,7 +24,8 @@
     "lodash": "^4.17.5",
     "moment": "^2.21.0",
     "moment-range": "^3.0.3",
-    "mongoose": "^4.12.3"
+    "mongoose": "^4.12.3",
+    "mongoose-timestamp": "^0.6.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

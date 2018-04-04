@@ -1,4 +1,12 @@
 import mongoose from 'mongoose'
+// import timestamps from 'mongoose-timestamp'
+const db = require('../../config/db.js')
+
+try {
+  mongoose.connect(db, { useMongoClient: true })
+} catch (error) {
+  console.log(error)
+}
 
 mongoose.Promise = require('bluebird')
 
@@ -40,7 +48,8 @@ const ContractSchema = mongoose.Schema({
       _id: false
     }
   ],
-  lastUpdated: Date,
+  updatedAt: Date,
+  createdAt: { type: Date, default: Date.now },
   client: Boolean,
   supplier: Boolean,
   // assignedTo may not always be ID so population potentially not always possible
@@ -58,6 +67,8 @@ const UserSchema = mongoose.Schema({
   isLawyer: Boolean,
   isAdmin: Boolean
 })
+
+// UserSchema.plugin(timestamps)
 
 const User = mongoose.model('user', UserSchema)
 
@@ -89,24 +100,21 @@ const NotificationSchema = mongoose.Schema({
   relatedContract: { type: Schema.Types.ObjectId, ref: 'contract' },
   action: String,
   relatedUser: { type: Schema.Types.ObjectId, ref: 'user' },
-  changes: Object
+  changes: Array,
+  createdAt: { type: Date, default: Date.now }
 })
+
+// NotificationSchema.plugin(timestamps)
 
 const Notification = mongoose.model('notification', NotificationSchema)
 export { Contract, User, MasterEntity, Notification }
 /*
-Notification.find().exec((err, notifications) => {
+Contract.find().exec((err, contracts) => {
+  console.log(contracts)
   if (err) console.log(err)
-  notifications.forEach(n => {
-    n.remove()
+  contracts.forEach(c => {
+    c.active = true
+    console.log(c)
+    Contract.findByIdAndUpdate(c._id, c, () => {})
   })
-})
-/*
-const contracts = generator(100)
-
-contracts.forEach(c => {
-  new Contract(c).save((err, res) => {
-    if (err) console.log(err)
-  })
-})
-*/
+}) */

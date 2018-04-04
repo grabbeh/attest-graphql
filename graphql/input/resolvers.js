@@ -5,7 +5,7 @@ import _ from 'lodash'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
-import { addNotification, detectChanges } from './utils'
+import { addNotification, detectChanges, filterDiff, sortDiff } from './utils'
 
 const resolvers = {
   Date: new GraphQLScalarType({
@@ -27,7 +27,8 @@ const resolvers = {
   Query: {
     contracts: async (root, args, { user }) => {
       return Contract.find({
-        masterEntityID: user.masterEntityID
+        masterEntityID: user.masterEntityID,
+        active: true
       })
     },
     contract: (root, { id }) => {
@@ -156,9 +157,14 @@ const resolvers = {
       })
     },
     updateContract: async (root, { contract }, { user }) => {
-      let differences = detectChanges(contract)
+      let differences = await detectChanges(contract)
+      // console.log(differences)
+      let filtered = filterDiff(differences)
+      let sorted = sortDiff(filtered)
+
       contract.assignedTo = contract.assignedTo.id
-      addNotification(contract.id, user, 'UPDATE_CONTRACT', differences)
+      contract.updatedAt = new Date()
+      addNotification(contract.id, user, 'UPDATE_CONTRACT', sorted)
       return Contract.findByIdAndUpdate(contract.id, contract, {
         new: true
       })
