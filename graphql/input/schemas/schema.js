@@ -42,22 +42,24 @@ type Notification {
 
 type Change {
   attr: String
-  added: String
-  addedObject: AddedObject
-  removed: String
-  removedObject: RemovedObject
+  added: Added
+  removed: Removed
 }
 
-type AddedObject {
+type Added {
+  email: String
   name: String
   color: String
   date: Date
+  change: String
 }
 
-type RemovedObject {
+type Removed {
+  email: String
   name: String
   color: String
   date: Date
+  change: String
 }
 
 type MasterEntity {
@@ -107,6 +109,7 @@ input PostUserWithID {
   isLawyer: Boolean
   isAdmin: Boolean
   isActivated: Boolean
+  favourites: [String]
 }
 
 input PostContract {
@@ -171,6 +174,7 @@ type Contract {
   assignedTo: User
   createdAt: Date
   updatedAt: Date
+  favourite: Boolean
 }
 
 input ContractStatusInput {

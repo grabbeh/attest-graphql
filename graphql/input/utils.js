@@ -29,48 +29,51 @@ const detectChanges = async newContract => {
     'masterEntityID',
     '_id'
   ])
+  cleanedOld.currentStatus = _.omit(cleanedOld.currentStatus, 'date')
   let cleanedNew = _.omit(newContract, 'id', 'statuses')
   cleanedNew.assignedTo = _.omit(cleanedNew.assignedTo, 'id')
+  cleanedNew.currentStatus = _.omit(cleanedNew.currentStatus, 'date')
   return d(cleanedOld, cleanedNew)
 }
 
 const filterDiff = differences => {
   let arr = []
-  differences.forEach(function (change) {
+  differences.forEach(change => {
     let o = {}
     // Item edited
     if (change.kind === 'E') {
-      if (change.path[0] === 'comments' && change.path[2] === 'text') {
-        o.attr = change.path[0]
+      /*   if (change.path[0] === 'comments' && change.path[2] === 'text') {
+        o.attr = change.path
         o.added = change.rhs
         o.removed = change.lhs
-      }
-      if (change.path[0] !== 'comments') {
-        o.attr = change.path[0]
-        o.added = change.rhs
-        o.removed = change.lhs
-      }
+      } */
+      //  if (change.path[0] !== 'comments') {
+      o.attr = change.path
+      o.added = change.rhs
+      o.removed = change.lhs
+      //   }
       arr.push(o)
     }
     if (change.kind === 'A') {
       // Item added to existing array
       if (change.item.kind === 'N') {
-        o.attr = change.path[0]
-        if (change.path[0] === 'comments') o.added = change.item.rhs.text
-        else o.added = change.item.rhs
+        o.attr = change.path
+        // if (change.path[0] === 'comments') o.added = change.item.rhs.text
+        /* else */ o.added = change.item.rhs
         arr.push(o)
       }
       // Deleted item
       if (change.item.kind === 'D') {
-        o.attr = change.path[0]
-        if (change.path[0] === 'comments') o.removed = change.item.lhs.text
-        else o.removed = change.item.lhs
+        o.attr = change.path
+        // if (change.path[0] === 'comments') o.removed = change.item.lhs.text
+        // else
+        o.removed = change.item.lhs
         arr.push(o)
       }
     }
     // New item
     if (change.kind === 'N') {
-      o.attr = change.path[0]
+      o.attr = change.path
       if (change.path[0] === 'comments') o.added = change.rhs[0].text
       else o.added = change.rhs[0]
       arr.push(o)
@@ -80,17 +83,30 @@ const filterDiff = differences => {
 }
 
 const sortDiff = arr => {
-  _.forEach(arr, a => {
-    if (_.isObject(a.added)) {
-      a.addedObject = a.added
-      a.added = 'OBJECT_TYPE'
-    }
-    if (_.isObject(a.removed)) {
-      a.removedObject = a.removed
-      a.removed = 'OBJECT_TYPE'
-    }
+  let withIDs = _.map(arr, i => {
+    let copy = _.clone(i.attr)
+    copy.pop()
+    let id = _.join(copy, ':')
+    return _.assign(i, { id })
   })
-  return arr
+
+  let o = _.values(_.groupBy(withIDs, 'id'))
+  let res = _.map(o, m => {
+    return _.map(m, i => {
+      let type = _.last(i.attr)
+      let attr = _.first(i.attr)
+      // set  added as i.added if i.added is object, otherwise create object from value
+      let added = _.isObject(i.added) ? i.added : { [type]: i.added }
+      let removed = _.isObject(i.removed) ? i.removed : { [type]: i.removed }
+      return {
+        attr,
+        added,
+        removed
+      }
+    })
+  })
+  let y = _.map(res, i => _.merge.apply(_, i))
+  return y
 }
 
 export { addNotification, detectChanges, filterDiff, sortDiff }

@@ -157,14 +157,12 @@ const resolvers = {
       })
     },
     updateContract: async (root, { contract }, { user }) => {
-      let differences = await detectChanges(contract)
-      // console.log(differences)
+      let differences = await detectChanges(_.cloneDeep(contract))
       let filtered = filterDiff(differences)
       let sorted = sortDiff(filtered)
-
       contract.assignedTo = contract.assignedTo.id
       contract.updatedAt = new Date()
-      addNotification(contract.id, user, 'UPDATE_CONTRACT', sorted)
+      addNotification(contract.id, user, 'updated contract', sorted)
       return Contract.findByIdAndUpdate(contract.id, contract, {
         new: true
       })
@@ -173,11 +171,11 @@ const resolvers = {
       contract.assignedTo = contract.assignedTo.id
       contract.masterEntityID = user.masterEntityID
       let newContract = await Contract.create(contract)
-      addNotification(newContract.id, user, 'ADD_CONTRACT')
+      addNotification(newContract.id, user, 'added contract')
       return newContract
     },
     deleteContract: async (root, { id }, { user }) => {
-      addNotification(id, user, 'DELETE_CONTRACT')
+      addNotification(id, user, 'deleted contract')
       let contract = await Contract.findById(id).lean()
       contract.active = false
       return Contract.findByIdAndUpdate(id, contract, { new: true })

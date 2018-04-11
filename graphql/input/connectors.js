@@ -54,7 +54,6 @@ const ContractSchema = mongoose.Schema({
   supplier: Boolean,
   // assignedTo may not always be ID so population potentially not always possible
   assignedTo: { type: Schema.Types.ObjectId, ref: 'user' }
-  // assignedTo: String
 })
 
 const Contract = mongoose.model('contract', ContractSchema)
@@ -65,7 +64,8 @@ const UserSchema = mongoose.Schema({
   password: String,
   masterEntityID: String,
   isLawyer: Boolean,
-  isAdmin: Boolean
+  isAdmin: Boolean,
+  favourites: { type: Schema.Types.ObjectId }
 })
 
 // UserSchema.plugin(timestamps)
@@ -118,3 +118,10 @@ Contract.find().exec((err, contracts) => {
     Contract.findByIdAndUpdate(c._id, c, () => {})
   })
 }) */
+/*
+Notification.find().exec((err, notifications) => {
+  notifications.forEach(n => {
+    n.remove()
+  })
+})
+*/
