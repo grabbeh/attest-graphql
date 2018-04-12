@@ -138,8 +138,9 @@ const resolvers = {
         .populate('relatedContract')
         .populate('relatedUser')
       let unread = _.filter(notifications, n => {
-        return !_.includes(n.readBy, user._id)
+        return !_.includes(n.readBy, user._id.toString())
       })
+
       return unread
     }
   },
@@ -259,6 +260,14 @@ const resolvers = {
       } else {
         return { name: 'Unassigned', email: 'Unassigned', id: 'Unassigned' }
       }
+    },
+    favourite: (contract, args, { user }) => {
+      let favourite = false
+      if (_.includes(user.favourites, contract.id)) {
+        favourite = true
+        return favourite
+      }
+      return favourite
     }
   }
 }

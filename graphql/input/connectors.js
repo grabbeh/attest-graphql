@@ -65,7 +65,7 @@ const UserSchema = mongoose.Schema({
   masterEntityID: String,
   isLawyer: Boolean,
   isAdmin: Boolean,
-  favourites: { type: Schema.Types.ObjectId }
+  favourites: Array
 })
 
 // UserSchema.plugin(timestamps)
@@ -95,7 +95,7 @@ const MasterEntitySchema = mongoose.Schema({
 const MasterEntity = mongoose.model('masterEntity', MasterEntitySchema)
 
 const NotificationSchema = mongoose.Schema({
-  readBy: { type: Array, default: [] },
+  readBy: Array,
   masterEntityID: Schema.Types.ObjectId,
   relatedContract: { type: Schema.Types.ObjectId, ref: 'contract' },
   action: String,
@@ -109,15 +109,14 @@ const NotificationSchema = mongoose.Schema({
 const Notification = mongoose.model('notification', NotificationSchema)
 export { Contract, User, MasterEntity, Notification }
 /*
-Contract.find().exec((err, contracts) => {
-  console.log(contracts)
+User.find().exec((err, users) => {
+  console.log(users)
   if (err) console.log(err)
-  contracts.forEach(c => {
-    c.active = true
-    console.log(c)
-    Contract.findByIdAndUpdate(c._id, c, () => {})
+  users.forEach(c => {
+    c.favourites = []
+    User.findByIdAndUpdate(c._id, c, () => {})
   })
-}) */
+})
 /*
 Notification.find().exec((err, notifications) => {
   notifications.forEach(n => {

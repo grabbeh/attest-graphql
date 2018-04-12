@@ -6,6 +6,7 @@ import schema from './schemas/schema'
 import jwt from 'jsonwebtoken'
 import SECRET from '../../config/jwt-secret.js'
 import mongoose from 'mongoose'
+import { User } from './connectors'
 mongoose.Promise = require('bluebird')
 
 const GRAPHQL_PORT = 8000
@@ -26,8 +27,12 @@ const addUser = async (req, res) => {
   // FIREFOX HEADERS ARE 'UNDEFINED' WHEN LOGGED OUT. CHROME IS JUST EMPTY
   req.user = null
   try {
+    // is string when derived from token but not when from DB which causes issues with filter
     const { user } = await jwt.verify(token, SECRET)
-    req.user = user
+    // console.log(user)
+    let fullUser = await User.findById(user._id)
+    // console.log(fullUser)
+    req.user = fullUser
     // ADD FULL USER INFORMATION TO SESSION THROUGH DB CALL?
   } catch (error) {}
 

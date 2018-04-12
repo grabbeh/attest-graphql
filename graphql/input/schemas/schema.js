@@ -88,6 +88,7 @@ type User {
   isAdmin: Boolean
   isActivated: Boolean
   checked: Boolean
+  favourites: [String]
 }
 
 input PostUser {
