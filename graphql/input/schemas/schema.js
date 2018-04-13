@@ -148,6 +148,7 @@ input PostContractWithID {
   client: Boolean
   supplier: Boolean
   assignedTo: PostUserWithID
+  favourite: Boolean
 }
 
 scalar Date
