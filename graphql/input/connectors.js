@@ -95,13 +95,14 @@ const MasterEntitySchema = mongoose.Schema({
 const MasterEntity = mongoose.model('masterEntity', MasterEntitySchema)
 
 const NotificationSchema = mongoose.Schema({
-  readBy: Array,
+  readBy: [{ type: String, default: [] }],
   masterEntityID: Schema.Types.ObjectId,
   relatedContract: { type: Schema.Types.ObjectId, ref: 'contract' },
   action: String,
   relatedUser: { type: Schema.Types.ObjectId, ref: 'user' },
   changes: Array,
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  seenBy: Array
 })
 
 // NotificationSchema.plugin(timestamps)
@@ -117,10 +118,8 @@ User.find().exec((err, users) => {
     User.findByIdAndUpdate(c._id, c, () => {})
   })
 })
-/*
 Notification.find().exec((err, notifications) => {
   notifications.forEach(n => {
     n.remove()
   })
-})
-*/
+}) */

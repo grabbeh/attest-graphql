@@ -30,7 +30,6 @@ type Mutation {
 }
 
 type Notification {
-  readBy: [String]
   masterEntityID: String
   relatedContract: Contract
   action: String
@@ -148,6 +147,7 @@ input PostContractWithID {
   client: Boolean
   supplier: Boolean
   assignedTo: PostUserWithID
+  favourite: Boolean
 }
 
 scalar Date

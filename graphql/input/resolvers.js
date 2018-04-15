@@ -133,14 +133,19 @@ const resolvers = {
     allUsers: async (root, args, { user }) => {
       return User.find({ masterEntityID: user.masterEntityID })
     },
-    allNotifications: async (roots, args, { user }) => {
-      let notifications = await Notification.find()
+    allNotifications: async (
+      roots,
+      args,
+      { user: { masterEntityID, _id } }
+    ) => {
+      let notifications = await Notification.find({
+        masterEntityID: masterEntityID
+      })
         .populate('relatedContract')
         .populate('relatedUser')
       let unread = _.filter(notifications, n => {
-        return !_.includes(n.readBy, user._id.toString())
+        return !_.includes(n.readBy, _id.toString())
       })
-
       return unread
     }
   },

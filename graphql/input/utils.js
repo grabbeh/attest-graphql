@@ -22,7 +22,8 @@ const detectChanges = async newContract => {
     'statuses',
     'masterEntityID',
     '_id',
-    '__v'
+    '__v',
+    'favourite'
   ])
   cleanedOld.assignedTo = _.omit(cleanedOld.assignedTo, [
     '__v',
@@ -30,7 +31,7 @@ const detectChanges = async newContract => {
     '_id'
   ])
   cleanedOld.currentStatus = _.omit(cleanedOld.currentStatus, 'date')
-  let cleanedNew = _.omit(newContract, 'id', 'statuses')
+  let cleanedNew = _.omit(newContract, 'id', 'statuses', 'favourite')
   cleanedNew.assignedTo = _.omit(cleanedNew.assignedTo, 'id')
   cleanedNew.currentStatus = _.omit(cleanedNew.currentStatus, 'date')
   return d(cleanedOld, cleanedNew)
