@@ -133,29 +133,71 @@ const resolvers = {
     allUsers: async (root, args, { user }) => {
       return User.find({ masterEntityID: user.masterEntityID })
     },
-    allNotifications: async (
-      roots,
+    unseenNotifications: async (
+      root,
       args,
       { user: { masterEntityID, _id } }
     ) => {
-      let notifications = await Notification.find({
-        masterEntityID: masterEntityID
-      })
+      return Notification.find()
+        .and([
+          {
+            masterEntityID: masterEntityID
+          },
+          {
+            seenBy: { $ne: _id.toString() }
+          }
+        ])
+        .exec()
+    },
+    activeNotifications: async (
+      root,
+      args,
+      { user: { masterEntityID, _id } }
+    ) => {
+      return Notification.find()
+        .and([
+          {
+            masterEntityID: masterEntityID
+          },
+          {
+            readBy: { $ne: _id.toString() }
+          }
+        ])
         .populate('relatedContract')
         .populate('relatedUser')
-      let unread = _.filter(notifications, n => {
-        return !_.includes(n.readBy, _id.toString())
-      })
-      return unread
+        .sort('-createdAt')
+        .exec()
     }
   },
   Mutation: {
-    updateNotification: async (root, { id }, { user }) => {
+    deactivateNotification: async (root, { id }, { user }) => {
       let notification = await Notification.findById(id)
       notification.readBy.push(user._id)
       return Notification.findByIdAndUpdate(id, notification, {
         new: true
       })
+    },
+    updateSeenNotifications: async (
+      root,
+      args,
+      { user: { masterEntityID, _id } }
+    ) => {
+      // find all notifications where the user id is not in the 'seenBy' field
+      // then add user id into those fields and save
+      // update so
+      let prevUnseenNotifications = await Notification.find().and([
+        {
+          masterEntityID: masterEntityID
+        },
+        {
+          seenBy: { $ne: _id.toString() }
+        }
+      ])
+      prevUnseenNotifications.forEach(n => {
+        n.seenBy.push(_id.toString())
+        n.save()
+      })
+      return 'Operation completed'
     },
     updateMasterEntity: (root, { masterEntity }, { user }) => {
       return MasterEntity.findByIdAndUpdate(user.masterEntityID, masterEntity, {
@@ -273,6 +315,16 @@ const resolvers = {
         return favourite
       }
       return favourite
+    }
+  },
+  Notification: {
+    unseen: (notification, args, { user }) => {
+      let unseen = true
+      if (_.includes(notification.seenBy, user._id.toString())) {
+        unseen = false
+        return unseen
+      }
+      return unseen
     }
   }
 }

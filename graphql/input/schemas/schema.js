@@ -13,7 +13,8 @@ type Query {
   currentLawyers: [User]
   currentStatuses: [Status]
   allUsers: [User]
-  allNotifications: [Notification]
+  activeNotifications: [Notification]
+  unseenNotifications: [Notification]
 }
 
 type Mutation {
@@ -25,7 +26,8 @@ type Mutation {
   updateUser(user: PostUserWithID): User
   createInitialAccount(name: String!, email: String!, password: String!): String
   updateMasterEntity(masterEntity: PostMasterEntity): MasterEntity
-  updateNotification(id: String): Notification
+  deactivateNotification(id: String): Notification
+  updateSeenNotifications: String
   login(email: String!, password: String!): String
 }
 
@@ -37,6 +39,7 @@ type Notification {
   id: ID
   changes: [Change]
   createdAt: Date
+  unseen: Boolean
 }
 
 type Change {
