@@ -133,21 +133,20 @@ const resolvers = {
     allUsers: async (root, args, { user }) => {
       return User.find({ masterEntityID: user.masterEntityID })
     },
-    unseenNotifications: async (
-      root,
-      args,
-      { user: { masterEntityID, _id } }
-    ) => {
-      return Notification.find()
-        .and([
-          {
-            masterEntityID: masterEntityID
-          },
-          {
-            seenBy: { $ne: _id.toString() }
-          }
-        ])
-        .exec()
+    unseenNotifications: async (root, args, { user }) => {
+      if (user) {
+        return Notification.find()
+          .and([
+            {
+              masterEntityID: user.masterEntityID
+            },
+            {
+              seenBy: { $ne: user._id.toString() }
+            }
+          ])
+          .exec()
+      }
+      return null
     },
     activeNotifications: async (
       root,
