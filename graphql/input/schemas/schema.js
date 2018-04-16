@@ -15,6 +15,7 @@ type Query {
   allUsers: [User]
   activeNotifications: [Notification]
   unseenNotifications: [Notification]
+  notificationsForContract(id: ID!): [Notification]
 }
 
 type Mutation {

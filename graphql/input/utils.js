@@ -58,14 +58,15 @@ const filterDiff = differences => {
     if (change.kind === 'A') {
       // Item added to existing array
       if (change.item.kind === 'N') {
-        o.attr = change.path
+        o.attr = [...change.path, change.index]
         // if (change.path[0] === 'comments') o.added = change.item.rhs.text
-        /* else */ o.added = change.item.rhs
+        /* else */
+        o.added = change.item.rhs
         arr.push(o)
       }
       // Deleted item
       if (change.item.kind === 'D') {
-        o.attr = change.path
+        o.attr = [...change.path, change.index]
         // if (change.path[0] === 'comments') o.removed = change.item.lhs.text
         // else
         o.removed = change.item.lhs
@@ -86,9 +87,15 @@ const filterDiff = differences => {
 const sortDiff = arr => {
   let withIDs = _.map(arr, i => {
     let copy = _.clone(i.attr)
-    copy.pop()
-    let id = _.join(copy, ':')
-    return _.assign(i, { id })
+    let id = null
+    if (_.isNumber(copy[1])) {
+      id = _.join(copy, ':')
+      return _.assign(i, { id })
+    } else {
+      copy.pop()
+      let id = _.join(copy, ':')
+      return _.assign(i, { id })
+    }
   })
 
   let o = _.values(_.groupBy(withIDs, 'id'))

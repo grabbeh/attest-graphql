@@ -31,8 +31,16 @@ const resolvers = {
         active: true
       })
     },
-    contract: (root, { id }) => {
-      return Contract.findOne({ id })
+    contract: async (root, { id }) => {
+      let contract = await Contract.findById(id)
+      return contract
+    },
+    notificationsForContract: async (root, { id }) => {
+      let notifications = await Notification.find({ relatedContract: id })
+        .populate('relatedContract')
+        .populate('relatedUser')
+        .sort('-createdAt')
+      return notifications
     },
     currentLawyers: async (root, args, { user }) => {
       let contracts = await Contract.find({
