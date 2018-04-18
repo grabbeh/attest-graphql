@@ -42,7 +42,7 @@ const filterDiff = differences => {
   differences.forEach(change => {
     let o = {}
     // Item edited
-    if (change.kind === 'E') {
+    if (change.kind === 'E' && change.path[0] !== 'tags') {
       /*   if (change.path[0] === 'comments' && change.path[2] === 'text') {
         o.attr = change.path
         o.added = change.rhs
@@ -86,15 +86,21 @@ const filterDiff = differences => {
 
 const sortDiff = arr => {
   let withIDs = _.map(arr, i => {
-    let copy = _.clone(i.attr)
-    let id = null
-    if (_.isNumber(copy[1])) {
-      id = _.join(copy, ':')
-      return _.assign(i, { id })
-    } else {
-      copy.pop()
-      let id = _.join(copy, ':')
-      return _.assign(i, { id })
+    if (i) {
+      let copy = _.clone(i.attr)
+      let id = null
+      if (copy.length === 2 && _.isNumber(copy[1])) {
+        id = _.join(copy, ':')
+        return _.assign(i, { id })
+      } else if (copy.length === 3 && copy[0] === 'tags') {
+        copy.pop()
+        id = _.join(copy, ':')
+        return _.assign(i, { id })
+      } else {
+        copy.pop()
+        let id = _.join(copy, ':')
+        return _.assign(i, { id })
+      }
     }
   })
 
