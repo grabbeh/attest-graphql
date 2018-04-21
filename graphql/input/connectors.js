@@ -65,7 +65,8 @@ const UserSchema = mongoose.Schema({
   masterEntityID: String,
   isLawyer: Boolean,
   isAdmin: Boolean,
-  favourites: Array
+  favourites: Array,
+  acceptedInvite: { type: Boolean, default: false }
 })
 
 // UserSchema.plugin(timestamps)
@@ -114,10 +115,10 @@ User.find().exec((err, users) => {
   console.log(users)
   if (err) console.log(err)
   users.forEach(c => {
-    c.favourites = []
+    c.acceptedInvite = false
     User.findByIdAndUpdate(c._id, c, () => {})
   })
-})/*
+}) /*
 Notification.find().exec((err, notifications) => {
   notifications.forEach(n => {
     n.remove()

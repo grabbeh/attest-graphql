@@ -7,12 +7,11 @@ type Query {
   contract(id: ID!): Contract
   masterEntity: MasterEntity
   allUsers: [User]
-  user: User
+  user(id: ID): User
   currentTags: [Tag]
   currentBusinessUnits: [BusinessUnit]
   currentLawyers: [User]
   currentStatuses: [Status]
-  allUsers: [User]
   activeNotifications: [Notification]
   unseenNotifications: [Notification]
   notificationsForContract(id: ID!): [Notification]
@@ -30,6 +29,7 @@ type Mutation {
   deactivateNotification(id: String): Notification
   updateSeenNotifications: String
   login(email: String!, password: String!): String
+  acceptInvite(user: PostUser): User
 }
 
 type Notification {
@@ -92,6 +92,7 @@ type User {
   isActivated: Boolean
   checked: Boolean
   favourites: [String]
+  acceptedInvite: Boolean
 }
 
 input PostUser {
@@ -103,6 +104,7 @@ input PostUser {
   isAdmin: Boolean
   isActivated: Boolean
   checked: Boolean
+  password: String
 }
 
 input PostUserWithID {
@@ -232,6 +234,6 @@ schema {
   mutation: Mutation
  }
 `
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+const mainSchema = makeExecutableSchema({ typeDefs, resolvers })
 
-export default schema
+export default mainSchema

@@ -131,8 +131,12 @@ const resolvers = {
       let entity = await MasterEntity.findById(user.masterEntityID)
       return entity
     },
-    user: async (root, args, { user }) => {
-      if (user) {
+
+    user: async (root, { id }, { user }) => {
+      // request user by ID as part of invite confirmation
+      if (id) {
+        return User.findById(id)
+      } else if (user) {
         let fullUser = await User.findById(user._id)
         return fullUser
       }
@@ -246,7 +250,8 @@ const resolvers = {
       }
       password = await bcrypt.hash(password, 10)
       let masterEntityID = newMasterEntity._id
-      let user = { email, password, masterEntityID }
+      let acceptedInvite = true
+      let user = { email, password, masterEntityID, acceptedInvite }
       return User.create(user)
 
       // Maybe just let user create account w/out validation for now
@@ -258,6 +263,14 @@ const resolvers = {
     },
     updateUser: async (root, { user }, context) => {
       return User.findByIdAndUpdate(user.id, user, {
+        new: true
+      })
+    },
+    acceptInvite: async (root, { user: { id, password } }, context) => {
+      let u = await User.findById(id)
+      u.acceptedInvite = true
+      u.password = await bcrypt.hash(password, 10)
+      return User.findByIdAndUpdate(id, u, {
         new: true
       })
     },
