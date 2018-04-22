@@ -118,7 +118,7 @@ User.find().exec((err, users) => {
     c.acceptedInvite = false
     User.findByIdAndUpdate(c._id, c, () => {})
   })
-}) /*
+})
 Notification.find().exec((err, notifications) => {
   notifications.forEach(n => {
     n.remove()
