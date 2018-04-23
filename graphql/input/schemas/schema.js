@@ -119,6 +119,7 @@ input PostUserWithID {
 }
 
 input PostContract {
+  id: ID
   internalParties: [String]
   externalParties: [String]
   executionDate: Date
@@ -133,7 +134,8 @@ input PostContract {
   statuses: [ContractStatusInput]
   client: Boolean
   supplier: Boolean
-  assignedTo: PostUserWithID  
+  assignedTo: PostUserWithID
+  favourite: Boolean
 }
 
 input PostContractWithID {

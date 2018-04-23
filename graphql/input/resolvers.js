@@ -215,23 +215,25 @@ const resolvers = {
         new: true
       })
     },
-    updateContract: async (root, { contract }, { user }) => {
-      let differences = await detectChanges(_.cloneDeep(contract))
-      let filtered = filterDiff(differences)
-      let sorted = sortDiff(filtered)
-      contract.assignedTo = contract.assignedTo.id
-      contract.updatedAt = new Date()
-      addNotification(contract.id, user, 'updated contract', sorted)
-      return Contract.findByIdAndUpdate(contract.id, contract, {
-        new: true
-      })
-    },
+    updateContract: async (root, { contract }, { user }) => {},
     addContract: async (root, { contract }, { user }) => {
-      contract.assignedTo = contract.assignedTo.id
-      contract.masterEntityID = user.masterEntityID
-      let newContract = await Contract.create(contract)
-      addNotification(newContract.id, user, 'added contract')
-      return newContract
+      if (contract.id) {
+        let differences = await detectChanges(_.cloneDeep(contract))
+        let filtered = filterDiff(differences)
+        let sorted = sortDiff(filtered)
+        contract.assignedTo = contract.assignedTo.id
+        contract.updatedAt = new Date()
+        addNotification(contract.id, user, 'updated contract', sorted)
+        return Contract.findByIdAndUpdate(contract.id, contract, {
+          new: true
+        })
+      } else {
+        contract.assignedTo = contract.assignedTo.id
+        contract.masterEntityID = user.masterEntityID
+        let newContract = await Contract.create(contract)
+        addNotification(newContract.id, user, 'added contract')
+        return newContract
+      }
     },
     deleteContract: async (root, { id }, { user }) => {
       addNotification(id, user, 'deleted contract')
