@@ -115,6 +115,7 @@ input PostUserWithID {
   isLawyer: Boolean
   isAdmin: Boolean
   isActivated: Boolean
+  acceptedInvite: Boolean
   favourites: [String]
 }
 

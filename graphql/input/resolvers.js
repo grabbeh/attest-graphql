@@ -218,8 +218,10 @@ const resolvers = {
     updateContract: async (root, { contract }, { user }) => {},
     addContract: async (root, { contract }, { user }) => {
       if (contract.id) {
+        console.log(contract)
         let differences = await detectChanges(_.cloneDeep(contract))
         let filtered = filterDiff(differences)
+        console.log(filtered)
         let sorted = sortDiff(filtered)
         contract.assignedTo = contract.assignedTo.id
         contract.updatedAt = new Date()
