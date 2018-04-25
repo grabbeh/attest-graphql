@@ -19,7 +19,6 @@ type Query {
 
 type Mutation {
   addContract(contract: PostContract): Contract
-  updateContract(contract: PostContractWithID): Contract
   deleteContract(id: ID!): Contract
   deleteUser(id: String!): User
   addUser(user: PostUser): User
@@ -120,26 +119,6 @@ input PostUserWithID {
 }
 
 input PostContract {
-  id: ID
-  internalParties: [String]
-  externalParties: [String]
-  executionDate: Date
-  effectiveDate: Date
-  expiryDate: Date
-  rollingTerm: Boolean
-  tags: [TagInput]
-  businessUnit: BusinessUnitInput
-  createdAt: Date
-  lastUpdated: Date
-  currentStatus: ContractStatusInput
-  statuses: [ContractStatusInput]
-  client: Boolean
-  supplier: Boolean
-  assignedTo: PostUserWithID
-  favourite: Boolean
-}
-
-input PostContractWithID {
   id: ID
   internalParties: [String]
   externalParties: [String]

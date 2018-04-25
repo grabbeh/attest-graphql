@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 // import timestamps from 'mongoose-timestamp'
-const db = require('../../config/db.js')
+import db from '../../config/db.js'
 
 try {
   mongoose.connect(db, { useMongoClient: true })
@@ -110,19 +110,3 @@ const NotificationSchema = mongoose.Schema({
 
 const Notification = mongoose.model('notification', NotificationSchema)
 export { Contract, User, MasterEntity, Notification }
-/*
-User.find().exec((err, users) => {
-  console.log(users)
-  if (err) console.log(err)
-  users.forEach(c => {
-    c.acceptedInvite = false
-    User.findByIdAndUpdate(c._id, c, () => {})
-  })
-})
-Notification.find().exec((err, notifications) => {
-  notifications.forEach(n => {
-    n.remove()
-  })
-})
-*/
-
