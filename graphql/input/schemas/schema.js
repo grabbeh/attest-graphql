@@ -23,11 +23,12 @@ type Mutation {
   deleteUser(id: String!): User
   addUser(user: PostUser): User
   updateUser(user: PostUserWithID): User
-  createInitialAccount(name: String!, email: String!, password: String!): String
+  createInitialAccount(name: String!, userName: String!, email: String!, password: String!): String
   updateMasterEntity(masterEntity: PostMasterEntity): MasterEntity
   deactivateNotification(id: String): Notification
   updateSeenNotifications: String
   login(email: String!, password: String!): String
+  logout: String
   acceptInvite(user: PostUser): User
 }
 

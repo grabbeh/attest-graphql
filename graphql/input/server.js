@@ -29,13 +29,9 @@ const addUser = async (req, res) => {
   try {
     // is string when derived from token but not when from DB which causes issues with filter
     const { user } = await jwt.verify(token, SECRET)
-    // console.log(user)
     let fullUser = await User.findById(user._id)
-    // console.log(fullUser)
     req.user = fullUser
-    // ADD FULL USER INFORMATION TO SESSION THROUGH DB CALL?
   } catch (error) {}
-
   req.next()
 }
 

@@ -46,9 +46,12 @@ const resolvers = {
       let contracts = await Contract.find({
         masterEntityID: user.masterEntityID
       }).populate('assignedTo')
+
       let lawyers = _.uniq(_.map(_.map(contracts, 'assignedTo'), 'name'))
+
       let updatedLawyers = lawyers.map(name => {
         let checked = false
+        if (!name) name = 'Unassigned'
         return {
           name,
           checked
@@ -221,14 +224,20 @@ const resolvers = {
         let differences = await detectChanges(_.cloneDeep(contract))
         let filtered = filterDiff(differences)
         let sorted = sortDiff(filtered)
-        contract.assignedTo = contract.assignedTo.id
+        if (mongoose.Types.ObjectId.isValid(contract.assignedTo.id)) {
+          contract.assignedTo = contract.assignedTo.id
+        } else delete contract.assignedTo
         contract.updatedAt = new Date()
         addNotification(contract.id, user, 'updated contract', sorted)
         return Contract.findByIdAndUpdate(contract.id, contract, {
           new: true
         })
       } else {
-        contract.assignedTo = contract.assignedTo.id
+        // new contract
+        if (contract.assignedTo && contract.assignedTo.id) {
+          contract.assignedTo = contract.assignedTo.id
+        } else delete contract.assignedTo
+
         contract.masterEntityID = user.masterEntityID
         let newContract = await Contract.create(contract)
         addNotification(newContract.id, user, 'added contract')
@@ -244,7 +253,7 @@ const resolvers = {
     deleteUser: (root, { id }) => {
       return User.remove({ _id: id })
     },
-    createInitialAccount: async (root, { name, email, password }) => {
+    createInitialAccount: async (root, { name, email, userName, password }) => {
       const newMasterEntity = await MasterEntity.create({ name })
       const existingUser = await User.findOne({ email })
       if (existingUser) {
@@ -253,7 +262,13 @@ const resolvers = {
       password = await bcrypt.hash(password, 10)
       let masterEntityID = newMasterEntity._id
       let acceptedInvite = true
-      let user = { email, password, masterEntityID, acceptedInvite }
+      let user = {
+        name: userName,
+        email,
+        password,
+        masterEntityID,
+        acceptedInvite
+      }
       return User.create(user)
 
       // Maybe just let user create account w/out validation for now
@@ -289,7 +304,8 @@ const resolvers = {
         expiresIn: '365d'
       })
       return token
-    }
+    },
+    logout: async (root, args, context) => {}
   },
   Status: {
     color: async (status, args, { user }) => {
