@@ -137,6 +137,7 @@ input PostContract {
   supplier: Boolean
   assignedTo: PostUserWithID
   favourite: Boolean
+  comments: [CommentInput]
 }
 
 scalar Date
@@ -165,6 +166,21 @@ type Contract {
   createdAt: Date
   updatedAt: Date
   favourite: Boolean
+  comments: [Comment]
+}
+
+input CommentInput {
+  text: String
+  createdAt: Date
+  updatedAt: Date
+  author: String
+}
+
+type Comment {
+  text: String
+  createdAt: Date
+  updatedAt: Date
+  author: String
 }
 
 input ContractStatusInput {

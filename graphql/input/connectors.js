@@ -48,6 +48,15 @@ const ContractSchema = mongoose.Schema({
       _id: false
     }
   ],
+  comments: [
+    {
+      text: String,
+      createdAt: Date,
+      updatedAt: Date,
+      author: String,
+      _id: false
+    }
+  ],
   updatedAt: Date,
   createdAt: { type: Date, default: Date.now },
   client: Boolean,

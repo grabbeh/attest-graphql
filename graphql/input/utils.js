@@ -23,18 +23,40 @@ const detectChanges = async newContract => {
     'masterEntityID',
     '_id',
     '__v',
-    'favourite'
+    'favourite',
+    'active'
   ])
   cleanedOld.assignedTo = _.omit(cleanedOld.assignedTo, [
     '__v',
     'masterEntityID',
-    '_id'
+    '_id',
+    'acceptedInvite',
+    'favourites',
+    'createdAt',
+    'createdAt',
+    'updatedAt'
   ])
   cleanedOld.currentStatus = _.omit(cleanedOld.currentStatus, 'date')
-
-  let cleanedNew = _.omit(newContract, 'id', 'statuses', 'favourite')
-  cleanedNew.assignedTo = _.omit(cleanedNew.assignedTo, 'id')
+  let cleanedNew = _.omit(newContract, 'id', 'statuses', 'favourite', 'active')
+  cleanedNew.assignedTo = _.omit(
+    cleanedNew.assignedTo,
+    'id',
+    'acceptedInvite',
+    'favourites'
+  )
   cleanedNew.currentStatus = _.omit(cleanedNew.currentStatus, 'date')
+
+  cleanedOld.comments = _.map(cleanedOld.comments, i => {
+    return {
+      name: i.text
+    }
+  })
+  cleanedNew.comments = _.map(cleanedNew.comments, i => {
+    return {
+      name: i.text
+    }
+  })
+
   return d(cleanedOld, cleanedNew)
 }
 
@@ -43,13 +65,13 @@ const filterDiff = differences => {
   differences.forEach(change => {
     let o = {}
     // Item edited
-    if (change.kind === 'E' && change.path[0] !== 'tags') {
-      /*   if (change.path[0] === 'comments' && change.path[2] === 'text') {
-        o.attr = change.path
-        o.added = change.rhs
-        o.removed = change.lhs
-      } */
-      //  if (change.path[0] !== 'comments') {
+    // excluded items where array is involved because movement of valid item
+    // registers as edit when it shouldn't
+    if (
+      change.kind === 'E' &&
+      change.path[0] !== 'tags' &&
+      change.path[0] !== 'comments'
+    ) {
       o.attr = change.path
       o.added = change.rhs
       o.removed = change.lhs
@@ -57,19 +79,15 @@ const filterDiff = differences => {
       arr.push(o)
     }
     if (change.kind === 'A') {
-      // Item added to existing array
       if (change.item.kind === 'N') {
         o.attr = [...change.path, change.index]
-        // if (change.path[0] === 'comments') o.added = change.item.rhs.text
-        /* else */
+
         o.added = change.item.rhs
         arr.push(o)
       }
       // Deleted item
       if (change.item.kind === 'D') {
         o.attr = [...change.path, change.index]
-        // if (change.path[0] === 'comments') o.removed = change.item.lhs.text
-        // else
         o.removed = change.item.lhs
         arr.push(o)
       }
@@ -77,8 +95,8 @@ const filterDiff = differences => {
     // New item
     if (change.kind === 'N') {
       o.attr = change.path
-      if (change.path[0] === 'comments') o.added = change.rhs[0].text
-      else o.added = change.rhs[0]
+      // if (change.path[0] === 'comments') o.added = change.rhs[0].text
+      /* else */ o.added = change.rhs[0]
       arr.push(o)
     }
   })
