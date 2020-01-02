@@ -1,8 +1,9 @@
 import express from 'express'
-import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
+import { ApolloServer, gql } from 'apollo-server-express'
+import resolvers from './resolvers'
+import typeDefs from './schemas/schema'
 import { formatError } from 'apollo-errors'
 import bodyParser from 'body-parser'
-import schema from './schemas/schema'
 import jwt from 'jsonwebtoken'
 import SECRET from '../../config/jwt-secret.js'
 import mongoose from 'mongoose'
@@ -10,43 +11,47 @@ import { User } from './connectors'
 mongoose.Promise = require('bluebird')
 
 const GRAPHQL_PORT = 8000
-const server = express()
+const app = express()
 const db = require('../../config/db.js')
 
 try {
-  mongoose.connect(db, { useMongoClient: true })
+  mongoose.connect(db)
 } catch (error) {
   console.log(error)
 }
 
-const addUser = async (req, res) => {
-  let token = req.headers['authorization'] || null
+const checkForUser = async authorisationHeader => {
+  // FIREFOX HEADERS ARE 'UNDEFINED' WHEN LOGGED OUT. CHROME IS JUST EMPTY SO DO A CHECK FOR BOTH
+  let token = authorisationHeader || null
   if (token === undefined) {
     token = null
   }
-  // FIREFOX HEADERS ARE 'UNDEFINED' WHEN LOGGED OUT. CHROME IS JUST EMPTY
-  req.user = null
-  try {
-    // is string when derived from token but not when from DB which causes issues with filter
-    const { user } = await jwt.verify(token, SECRET)
-    let fullUser = await User.findById(user._id)
-    req.user = fullUser
-  } catch (error) {}
-  req.next()
+  if (token) {
+    try {
+      // is string when derived from token but not when from DB which causes issues with filter
+      const { user } = jwt.verify(token, SECRET)
+      let fullUser = await User.findById(user._id)
+      return fullUser
+    } catch (error) {
+      console.log(error)
+      return {}
+    }
+  } else {
+    return null
+  }
 }
 
-server.use(addUser)
-server.use(
-  '/graphql',
-  bodyParser.json(),
-  graphqlExpress(req => ({
-    formatError,
-    schema,
-    context: {
-      SECRET,
-      user: req.user
+app.use('*', bodyParser.json())
+
+const server = new ApolloServer({
+  resolvers,
+  typeDefs,
+  context: async integrationContext => {
+    return {
+      user: await checkForUser(integrationContext.req.headers['authorization'])
     }
-  }))
-)
-server.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
-server.listen(GRAPHQL_PORT)
+  }
+})
+
+server.applyMiddleware({ app, path: '/graphql' })
+app.listen(GRAPHQL_PORT)

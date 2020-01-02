@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 import { addNotification, detectChanges, filterDiff, sortDiff } from './utils'
+import SECRET from '../../config/jwt-secret.js'
 
 const resolvers = {
   Date: new GraphQLScalarType({
@@ -25,24 +26,23 @@ const resolvers = {
     }
   }),
   Query: {
-    contracts: async (root, args, { user }) => {
-      return Contract.find({
+    contracts: async (__, ___, { user }) =>
+      Contract.find({
         masterEntityID: user.masterEntityID,
         active: true
-      })
-    },
-    contract: async (root, { id }) => {
+      }),
+    contract: async (__, { id }) => {
       let contract = await Contract.findById(id)
       return contract
     },
-    notificationsForContract: async (root, { id }) => {
+    notificationsForContract: async (__, { id }) => {
       let notifications = await Notification.find({ relatedContract: id })
         .populate('relatedContract')
         .populate('relatedUser')
         .sort('-createdAt')
       return notifications
     },
-    currentLawyers: async (root, args, { user }) => {
+    currentLawyers: async (__, ___, { user }) => {
       let contracts = await Contract.find({
         masterEntityID: user.masterEntityID
       }).populate('assignedTo')
@@ -59,7 +59,7 @@ const resolvers = {
       })
       return updatedLawyers
     },
-    currentTags: async (root, args, { user }) => {
+    currentTags: async (__, ___, { user }) => {
       let contracts = await Contract.find({
         masterEntityID: user.masterEntityID
       })
@@ -84,7 +84,7 @@ const resolvers = {
       })
       return updatedTags
     },
-    currentBusinessUnits: async (root, args, { user }) => {
+    currentBusinessUnits: async (__, ___, { user }) => {
       let contracts = await Contract.find({
         masterEntityID: user.masterEntityID
       })
@@ -108,7 +108,7 @@ const resolvers = {
       })
       return updatedUnits
     },
-    currentStatuses: async (root, args, { user }) => {
+    currentStatuses: async (__, ___, { user }) => {
       let contracts = await Contract.find({
         masterEntityID: user.masterEntityID
       })
@@ -130,12 +130,12 @@ const resolvers = {
       })
       return updatedStatuses
     },
-    masterEntity: async (root, args, { user }) => {
+    masterEntity: async (__, ___, { user }) => {
       let entity = await MasterEntity.findById(user.masterEntityID)
       return entity
     },
 
-    user: async (root, { id }, { user }) => {
+    user: async (__, { id }, { user }) => {
       // request user by ID as part of invite confirmation
       if (id) {
         return User.findById(id)
@@ -145,29 +145,25 @@ const resolvers = {
       }
       return null
     },
-    allUsers: async (root, args, { user }) => {
+    allUsers: async (__, ___, { user }) => {
       return User.find({ masterEntityID: user.masterEntityID })
     },
-    unseenNotifications: async (root, args, { user }) => {
-      if (user) {
+    unseenNotifications: async (__, ___, ctx) => {
+      if (ctx.user) {
         return Notification.find()
           .and([
             {
-              masterEntityID: user.masterEntityID
+              masterEntityID: ctx.user.masterEntityID
             },
             {
-              seenBy: { $ne: user._id.toString() }
+              seenBy: { $ne: ctx.user._id.toString() }
             }
           ])
           .exec()
       }
       return null
     },
-    activeNotifications: async (
-      root,
-      args,
-      { user: { masterEntityID, _id } }
-    ) => {
+    activeNotifications: async (__, ___, { user: { masterEntityID, _id } }) => {
       return Notification.find()
         .and([
           {
@@ -184,7 +180,7 @@ const resolvers = {
     }
   },
   Mutation: {
-    deactivateNotification: async (root, { id }, { user }) => {
+    deactivateNotification: async (__, { id }, { user }) => {
       let notification = await Notification.findById(id)
       notification.readBy.push(user._id)
       return Notification.findByIdAndUpdate(id, notification, {
@@ -213,12 +209,12 @@ const resolvers = {
       })
       return 'Operation completed'
     },
-    updateMasterEntity: (root, { masterEntity }, { user }) => {
+    updateMasterEntity: (__, { masterEntity }, { user }) => {
       return MasterEntity.findByIdAndUpdate(user.masterEntityID, masterEntity, {
         new: true
       })
     },
-    addContract: async (root, { contract }, { user }) => {
+    addContract: async (__, { contract }, { user }) => {
       // existing contract
       if (contract.id) {
         let differences = await detectChanges(_.cloneDeep(contract))
@@ -244,16 +240,16 @@ const resolvers = {
         return newContract
       }
     },
-    deleteContract: async (root, { id }, { user }) => {
+    deleteContract: async (__, { id }, { user }) => {
       addNotification(id, user, 'deleted contract')
       let contract = await Contract.findById(id).lean()
       contract.active = false
       return Contract.findByIdAndUpdate(id, contract, { new: true })
     },
-    deleteUser: (root, { id }) => {
+    deleteUser: (__, { id }) => {
       return User.remove({ _id: id })
     },
-    createInitialAccount: async (root, { name, email, userName, password }) => {
+    createInitialAccount: async (__, { name, email, userName, password }) => {
       const newMasterEntity = await MasterEntity.create({ name })
       const existingUser = await User.findOne({ email })
       if (existingUser) {
@@ -273,17 +269,17 @@ const resolvers = {
 
       // Maybe just let user create account w/out validation for now
     },
-    addUser: async (root, { user }, context) => {
+    addUser: async (__, { user }, context) => {
       user.masterEntityID = context.user.masterEntityID
       if (user.password) user.password = await bcrypt.hash(user.password, 10)
       return User.create(user)
     },
-    updateUser: async (root, { user }, context) => {
+    updateUser: async (__, { user }) => {
       return User.findByIdAndUpdate(user.id, user, {
         new: true
       })
     },
-    acceptInvite: async (root, { user: { id, password } }, context) => {
+    acceptInvite: async (__, { user: { id, password } }) => {
       let u = await User.findById(id)
       u.acceptedInvite = true
       u.password = await bcrypt.hash(password, 10)
@@ -291,7 +287,7 @@ const resolvers = {
         new: true
       })
     },
-    login: async (root, { email, password }, { SECRET }) => {
+    login: async (__, { email, password }, ctx) => {
       const user = await User.findOne({ email })
       if (!user) {
         throw new Error('Unknown user')
@@ -305,10 +301,10 @@ const resolvers = {
       })
       return token
     },
-    logout: async (root, args, context) => {}
+    logout: async (__, ___, ____) => {}
   },
   Status: {
-    color: async (status, args, { user }) => {
+    color: async (status, __, { user }) => {
       let entity = await MasterEntity.findById(user.masterEntityID)
       let color = status.color
       entity.statuses.forEach(s => {
@@ -318,7 +314,7 @@ const resolvers = {
     }
   },
   Tag: {
-    color: async (tag, args, { user }) => {
+    color: async (tag, __, { user }) => {
       let entity = await MasterEntity.findById(user.masterEntityID)
       let color = tag.color
       entity.tags.forEach(t => {
@@ -328,7 +324,7 @@ const resolvers = {
     }
   },
   BusinessUnit: {
-    color: async (businessUnit, args, { user }) => {
+    color: async (businessUnit, __, { user }) => {
       let entity = await MasterEntity.findById(user.masterEntityID)
       let color = businessUnit.color
       entity.businessUnits.forEach(b => {
@@ -346,7 +342,7 @@ const resolvers = {
         return { name: 'Unassigned', email: 'Unassigned', id: 'Unassigned' }
       }
     },
-    favourite: (contract, args, { user }) => {
+    favourite: (contract, __, { user }) => {
       let favourite = false
       if (_.includes(user.favourites, contract.id)) {
         favourite = true
@@ -356,7 +352,7 @@ const resolvers = {
     }
   },
   Notification: {
-    unseen: (notification, args, { user }) => {
+    unseen: (notification, __, { user }) => {
       let unseen = true
       if (_.includes(notification.seenBy, user._id.toString())) {
         unseen = false

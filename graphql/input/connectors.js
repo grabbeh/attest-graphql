@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import db from '../../config/db.js'
 
 try {
-  mongoose.connect(db, { useMongoClient: true })
+  mongoose.connect(db)
 } catch (error) {
   console.log(error)
 }

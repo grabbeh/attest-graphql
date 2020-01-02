@@ -1,6 +1,3 @@
-import { makeExecutableSchema } from 'graphql-tools'
-import resolvers from '../resolvers'
-
 const typeDefs = `
 type Query {
   contracts: [Contract]
@@ -163,7 +160,6 @@ type Contract {
   client: Boolean
   supplier: Boolean
   assignedTo: User
-  createdAt: Date
   updatedAt: Date
   favourite: Boolean
   comments: [Comment]
@@ -233,6 +229,6 @@ schema {
   mutation: Mutation
  }
 `
-const mainSchema = makeExecutableSchema({ typeDefs, resolvers })
+//const mainSchema = makeExecutableSchema({ typeDefs, resolvers })
 
-export default mainSchema
+export default typeDefs
