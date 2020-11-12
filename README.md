@@ -4,10 +4,16 @@ This is the graphql server which supports the attest frontend at https://github.
 
 **Dependencies**
 
-- A MongoDB database string referenced in /config/db.js matching:
+- A MongoDB database string referenced in ```/config/db.js``` matching:
 
 ```
 module.exports = 'mongodb://username:password@ipaddress/dbname'
+```
+
+- A secret for JWT to work stored in ```/config/jwt-secret.js``` matching:
+
+```
+module.exports = `random string of letters and numbers`
 ```
 
 **Development**
